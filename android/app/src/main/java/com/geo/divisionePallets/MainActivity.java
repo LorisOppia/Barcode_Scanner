@@ -1,4 +1,4 @@
-package com.geo.farmacie;
+package com.geo.divisionePallets;
 
 import com.getcapacitor.BridgeActivity;
 

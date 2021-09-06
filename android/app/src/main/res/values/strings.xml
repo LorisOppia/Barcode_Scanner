@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">geo-farmacie</string>
-    <string name="title_activity_main">geo-farmacie</string>
+    <string name="app_name">Divisone Pallets</string>
+    <string name="title_activity_main">Divisione Pallets</string>
     <string name="package_name">com.geo.farmacie</string>
     <string name="custom_url_scheme">com.geo.farmacie</string>
 </resources>
