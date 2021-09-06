@@ -9,8 +9,8 @@ import {
   IonInput,
   IonLabel,
   IonItem,
-  IonText,
   IonActionSheet,
+  IonAlert,
 } from '@ionic/react'
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
@@ -19,13 +19,15 @@ const AboutUs = props => {
   const [codice, setCodice] = React.useState()
   const [codice_nuovo, setCodice_nuovo] = React.useState()
   const [nascondi, setNascondi] = React.useState(false)
-  const [showModal, setShowModal] = React.useState(false)
+  const [showAlert, setShowAlert] = React.useState(false)
+  const [showAlert_nuovo, setShowModal_nuovo] = React.useState(false)
+
+  //const [pulsante, setPulsante] = React.useState() 
   const [showToast_invio, setShowToast_invio] = React.useState(false)
   const [showToast_annulla, setShowToast_annulla] = React.useState(false)
-
+  const [showActionSheet, setShowActionSheet] = React.useState(false)
   const [quantità, setQuantità] = React.useState()
-  const [quantità_nuova, setQuantità_nuova] = React.useState(0)
-
+  const [quantità_nuova, setQuantità_nuova] = React.useState()
 
   const checkPermission = async (pulsante) => {
     const status = await BarcodeScanner.checkPermission({ force: true });     //chiede permesso fotocamera
@@ -38,38 +40,8 @@ const AboutUs = props => {
     if (result.hasContent) {if (pulsante===0) {setCodice(result.content);}
                             if (pulsante===1) {setCodice_nuovo(result.content);}
                             setNascondi(false);   //fa vedere la pagina
-                            //setShowModal(true);   //fa vedere il modal
                             }
   };
-
-  let url = "http://127.0.0.1:8000"
-  /*let aut = 'admin:password'
-  const getData = async () => {
-      const data = await fetch(url,{
-        credentials: 'same-origin',
-        headers: {
-          'authorization': 'Basic '+ aut.toString('base64'),
-        }
-      })
-      const datajson = await data.json()
-      console.log(datajson)       
-  };*/
-
-  const GetPallets  = async () =>{ fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-            },
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Success:', data)
-    })
-    .catch(error => {
-      console.error('Error:', error)
-    })
-    return;
-  }
 
     if (nascondi === false){
     return (
@@ -79,21 +51,66 @@ const AboutUs = props => {
       </IonToolbar>
       <IonContent>
 
-        <IonModal isOpen={false}>
-            <IonLabel>Codice rilevato: {codice}</IonLabel>
-            <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
-            <IonButton onClick={() => {setShowModal(false);   //nasconde il modal
-                                       setShowToast_invio(true)     //mostra il toast
-                                       }
-                                }>
-                 Aggiungi
-            </IonButton>
-        </IonModal>
+      <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          cssClass='my-custom-class'
+          header={'Inserisci nuova quantità'}
+          inputs={[
+            {
+              name: 'name',
+              type: 'number',
+              placeholder: 'Quantità',
+            },         
+          ]}
+          buttons={[
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary',
+              handler: () => {}
+            },
+            {
+              text: 'Ok',
+              handler: data => {
+                setQuantità(parseInt(data.name))
+              }
+            }
+          ]}
+        />
+
+        <IonAlert
+          isOpen={showAlert_nuovo}
+          onDidDismiss={() => setShowModal_nuovo(false)}
+          cssClass='my-custom-class'
+          header={'Inserisci quantità sottratta'}
+          inputs={[
+            {
+              name: 'name',
+              type: 'number',
+              placeholder: 'Quantità',
+            },         
+          ]}
+          buttons={[
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary',
+              handler: () => {}
+            },
+            {
+              text: 'Ok',
+              handler: data => {
+                setQuantità_nuova(parseInt(data.name))
+              }
+            }
+          ]}
+        />
 
         <IonActionSheet 
-            isOpen={showModal}
-            onDidDismiss={() => setShowModal(false)}
-            header= "Vuoi inviare?"
+            isOpen={showActionSheet}
+            onDidDismiss={() => setShowActionSheet(false)}
+            header= {"Vuoi inviare " + quantità + " oggetti e " + quantità_nuova + " oggetti?"}
             buttons={[{
               text: 'Invio',
               handler: () => { setShowToast_invio(true)}
@@ -101,7 +118,6 @@ const AboutUs = props => {
               text: 'Annulla',
               handler: () => { setShowToast_annulla(true)}
             }]}>
-
         </IonActionSheet>
 
         <IonToast
@@ -121,42 +137,42 @@ const AboutUs = props => {
             color="danger"
           />
             <IonItem>
-              <IonText position="floating">
+              <IonLabel >
               QR: {codice}
-              </IonText>  
+              </IonLabel>  
               <IonButton onClick={() => {checkPermission(0)}} size="medium" expand="block" slot="end">
                  QR CODE SCAN
               </IonButton>
             </IonItem>
             
             <IonItem>
-            <IonLabel position="floating">
-            Nuova Quantità
+            <IonLabel>
+              Nuova quantità: {quantità}
             </IonLabel>
-            <IonInput ionChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" > {quantità}
-            </IonInput>
+            <IonButton onClick={() => setShowAlert(true)} size="medium" expand="block" slot="end">
+                 Inserisci quantità
+              </IonButton>
             </IonItem>
 
-
             <IonItem>
-              <IonText position="floating">
+              <IonLabel>
               QR: {codice_nuovo}
-              </IonText>  
+              </IonLabel>  
               <IonButton onClick={() => {checkPermission(1)}} size="medium" expand="block" slot="end">
                  NEW QR CODE SCAN
               </IonButton>
             </IonItem>
 
             <IonItem>
-            <IonLabel position="floating">
-              Quantità sottratta
+            <IonLabel>
+              Quantità sottratta: {quantità_nuova}
             </IonLabel>
-            <IonInput onIonChange={e => setQuantità_nuova(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" >
-              {quantità_nuova}
-            </IonInput>
+            <IonButton onClick={() => setShowModal_nuovo(true)} size="medium" expand="block" slot="end">
+            Inserisci quantità
+              </IonButton>
             </IonItem>
 
-            <IonButton onClick={() => setShowModal(true)} size="large" expand="block" color="success" >
+            <IonButton onClick={() => setShowActionSheet(true)} size="large" expand="block" color="success" >
                  Invio
             </IonButton>            
       </IonContent>
