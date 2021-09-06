@@ -11,7 +11,7 @@ import {
 import { IonReactRouter } from '@ionic/react-router'
 import { home } from 'ionicons/icons'
 
-import AboutUs from './pages/aboutUs/AboutUs'
+import AboutUs from './pages/pallets/Pallets'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css'
@@ -45,7 +45,7 @@ const App = () => {
           </IonRouterOutlet>
 
           <IonTabBar slot="bottom">
-            <IonTabButton tab="aboutus" href="/">
+            <IonTabButton tab="pallets" href="/">
               <IonIcon icon={home} />
               <IonLabel>Home</IonLabel>
             </IonTabButton>

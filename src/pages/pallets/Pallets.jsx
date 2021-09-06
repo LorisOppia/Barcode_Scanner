@@ -4,9 +4,7 @@ import {
   IonButton,
   IonToolbar,
   IonTitle,
-  IonModal,
   IonToast,
-  IonInput,
   IonLabel,
   IonItem,
   IonActionSheet,
@@ -15,17 +13,22 @@ import {
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
-const AboutUs = props => {
-  const [codice, setCodice] = React.useState()
-  const [codice_nuovo, setCodice_nuovo] = React.useState()
+import { url } from '../../config/config'
+
+
+const Pallets = props => {
+
+  //Visibility Variables
   const [nascondi, setNascondi] = React.useState(false)
   const [showAlert, setShowAlert] = React.useState(false)
   const [showAlert_nuovo, setShowModal_nuovo] = React.useState(false)
-
-  //const [pulsante, setPulsante] = React.useState() 
   const [showToast_invio, setShowToast_invio] = React.useState(false)
   const [showToast_annulla, setShowToast_annulla] = React.useState(false)
   const [showActionSheet, setShowActionSheet] = React.useState(false)
+
+  //Query Variables
+  const [codice, setCodice] = React.useState()
+  const [codice_nuovo, setCodice_nuovo] = React.useState()
   const [quantità, setQuantità] = React.useState()
   const [quantità_nuova, setQuantità_nuova] = React.useState()
 
@@ -42,6 +45,34 @@ const AboutUs = props => {
                             setNascondi(false);   //fa vedere la pagina
                             }
   };
+
+  const postPallets = async ()=> {
+    var data = {"qr" : "zzzz", "nuova_qt":quantità,"nuovo_qr":"aaaa","qt_sottratta":quantità_nuova};
+    try {
+    fetch(url,{
+    method: 'POST', 
+    mode: 'cors', 
+    cache: 'no-cache', 
+    credentials: 'same-origin', 
+    headers: {
+    'Content-Type': 'application/json'
+    // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  redirect: 'follow',
+  referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  body: JSON.stringify(data) // body data type must match "Content-Type" header
+  });
+  setCodice();
+  setQuantità();
+  setCodice_nuovo();
+  setQuantità_nuova();
+}
+  catch(error){
+
+  }
+}
+
+  
 
     if (nascondi === false){
     return (
@@ -113,7 +144,9 @@ const AboutUs = props => {
             header= {"Vuoi inviare " + quantità + " oggetti e " + quantità_nuova + " oggetti?"}
             buttons={[{
               text: 'Invio',
-              handler: () => { setShowToast_invio(true)}
+              handler: () => { 
+                postPallets();
+                setShowToast_invio(true)}
             },  {
               text: 'Annulla',
               handler: () => { setShowToast_annulla(true)}
@@ -136,6 +169,7 @@ const AboutUs = props => {
             position="bottom"
             color="danger"
           />
+
             <IonItem>
               <IonLabel >
               QR: {codice}
@@ -185,4 +219,4 @@ const AboutUs = props => {
   }
 }
 
-export default AboutUs
+export default Pallets
