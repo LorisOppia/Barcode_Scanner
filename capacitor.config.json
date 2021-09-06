@@ -1,0 +1,6 @@
+{
+  "appId": "com.geo.farmacie",
+  "appName": "geo-farmacie",
+  "webDir": "build",
+  "bundledWebRuntime": false
+}
