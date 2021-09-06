@@ -10,6 +10,7 @@ import {
   IonLabel,
   IonItem,
   IonText,
+  IonActionSheet,
 } from '@ionic/react'
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
@@ -19,8 +20,12 @@ const AboutUs = props => {
   const [codice_nuovo, setCodice_nuovo] = React.useState()
   const [nascondi, setNascondi] = React.useState(false)
   const [showModal, setShowModal] = React.useState(false)
-  const [showToast, setShowToast] = React.useState(false)
-  const [quantità, setQuantità] = React.useState(0)
+  const [showToast_invio, setShowToast_invio] = React.useState(false)
+  const [showToast_annulla, setShowToast_annulla] = React.useState(false)
+
+  const [quantità, setQuantità] = React.useState()
+  const [quantità_nuova, setQuantità_nuova] = React.useState(0)
+
 
   const checkPermission = async (pulsante) => {
     const status = await BarcodeScanner.checkPermission({ force: true });     //chiede permesso fotocamera
@@ -74,24 +79,46 @@ const AboutUs = props => {
       </IonToolbar>
       <IonContent>
 
-        <IonModal isOpen={showModal}>
+        <IonModal isOpen={false}>
             <IonLabel>Codice rilevato: {codice}</IonLabel>
             <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
             <IonButton onClick={() => {setShowModal(false);   //nasconde il modal
-                                       setShowToast(true)     //mostra il toast
+                                       setShowToast_invio(true)     //mostra il toast
                                        }
                                 }>
                  Aggiungi
             </IonButton>
         </IonModal>
 
+        <IonActionSheet 
+            isOpen={showModal}
+            onDidDismiss={() => setShowModal(false)}
+            header= "Vuoi inviare?"
+            buttons={[{
+              text: 'Invio',
+              handler: () => { setShowToast_invio(true)}
+            },  {
+              text: 'Annulla',
+              handler: () => { setShowToast_annulla(true)}
+            }]}>
+
+        </IonActionSheet>
+
         <IonToast
-            isOpen={showToast}
-            duration={3000}
-            onDidDismiss={() => setShowToast(false)}    //dopo 2 secondi si chiude e setta a false
-            message={"Hai aggiunto " + quantità + " oggetti"}
+            isOpen={showToast_invio}
+            duration={2000}
+            onDidDismiss={() => setShowToast_invio(false)}    //dopo 2 secondi si chiude e setta a false
+            message="Operazione completata"
             position="bottom"
             color="success"
+          />
+          <IonToast
+            isOpen={showToast_annulla}
+            duration={2000}
+            onDidDismiss={() => setShowToast_annulla(false)}    //dopo 2 secondi si chiude e setta a false
+            message="Operazione annullata"
+            position="bottom"
+            color="danger"
           />
             <IonItem>
               <IonText position="floating">
@@ -104,9 +131,10 @@ const AboutUs = props => {
             
             <IonItem>
             <IonLabel position="floating">
-              Nuova quantità
+            Nuova Quantità
             </IonLabel>
-            <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
+            <IonInput ionChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" > {quantità}
+            </IonInput>
             </IonItem>
 
 
@@ -123,10 +151,12 @@ const AboutUs = props => {
             <IonLabel position="floating">
               Quantità sottratta
             </IonLabel>
-            <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
+            <IonInput onIonChange={e => setQuantità_nuova(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" >
+              {quantità_nuova}
+            </IonInput>
             </IonItem>
 
-            <IonButton onClick={null} size="large" expand="block" color="success" >
+            <IonButton onClick={() => setShowModal(true)} size="large" expand="block" color="success" >
                  Invio
             </IonButton>            
       </IonContent>
