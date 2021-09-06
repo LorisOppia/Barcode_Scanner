@@ -17,22 +17,21 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 const AboutUs = props => {
   const [codice, setCodice] = React.useState()
   const [codice_nuovo, setCodice_nuovo] = React.useState()
-  const [tasto, setTasto] = React.useState(0)
   const [nascondi, setNascondi] = React.useState(false)
   const [showModal, setShowModal] = React.useState(false)
   const [showToast, setShowToast] = React.useState(false)
   const [quantità, setQuantità] = React.useState(0)
 
-  const checkPermission = async () => {
+  const checkPermission = async (pulsante) => {
     const status = await BarcodeScanner.checkPermission({ force: true });     //chiede permesso fotocamera
-    if (status.granted) { startScan() }
+    if (status.granted) { startScan(pulsante) }
     };
 
-  const startScan = async () => {
+  const startScan = async (pulsante) => {
     setNascondi(true)    //fa vedere la fotocamera
     const result = await BarcodeScanner.startScan();
-    if (result.hasContent) {if (tasto===0) {setCodice(result.content);}
-                            if (tasto===1) {setCodice_nuovo(result.content);}
+    if (result.hasContent) {if (pulsante===0) {setCodice(result.content);}
+                            if (pulsante===1) {setCodice_nuovo(result.content);}
                             setNascondi(false);   //fa vedere la pagina
                             //setShowModal(true);   //fa vedere il modal
                             }
@@ -98,7 +97,7 @@ const AboutUs = props => {
               <IonText position="floating">
               QR: {codice}
               </IonText>  
-              <IonButton onClick={() => {setTasto(0); checkPermission()}} size="medium" expand="block" slot="end">
+              <IonButton onClick={() => {checkPermission(0)}} size="medium" expand="block" slot="end">
                  QR CODE SCAN
               </IonButton>
             </IonItem>
@@ -115,7 +114,7 @@ const AboutUs = props => {
               <IonText position="floating">
               QR: {codice_nuovo}
               </IonText>  
-              <IonButton onClick={() => {setTasto(1); checkPermission()}} size="medium" expand="block" slot="end">
+              <IonButton onClick={() => {checkPermission(1)}} size="medium" expand="block" slot="end">
                  NEW QR CODE SCAN
               </IonButton>
             </IonItem>
