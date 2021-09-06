@@ -8,12 +8,16 @@ import {
   IonToast,
   IonInput,
   IonLabel,
+  IonItem,
+  IonText,
 } from '@ionic/react'
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 const AboutUs = props => {
-  const [codice, setCodice] = React.useState(0)
+  const [codice, setCodice] = React.useState()
+  const [codice_nuovo, setCodice_nuovo] = React.useState()
+  const [tasto, setTasto] = React.useState(0)
   const [nascondi, setNascondi] = React.useState(false)
   const [showModal, setShowModal] = React.useState(false)
   const [showToast, setShowToast] = React.useState(false)
@@ -27,15 +31,15 @@ const AboutUs = props => {
   const startScan = async () => {
     setNascondi(true)    //fa vedere la fotocamera
     const result = await BarcodeScanner.startScan();
-    if (result.hasContent) {setCodice(result.content);
+    if (result.hasContent) {if (tasto===0) {setCodice(result.content);}
+                            if (tasto===1) {setCodice_nuovo(result.content);}
                             setNascondi(false);   //fa vedere la pagina
-                            setShowModal(true);   //fa vedere il modal
+                            //setShowModal(true);   //fa vedere il modal
                             }
   };
 
-  let url = "http://localhost:8000/admin/login/?next=/admin/"
-  //let url1 = "https://dog.ceo/api/breeds/image/random"
-  let aut = 'admin:password'
+  let url = "http://127.0.0.1:8000"
+  /*let aut = 'admin:password'
   const getData = async () => {
       const data = await fetch(url,{
         credentials: 'same-origin',
@@ -43,9 +47,25 @@ const AboutUs = props => {
           'authorization': 'Basic '+ aut.toString('base64'),
         }
       })
-      const datajson = await data.text()
+      const datajson = await data.json()
       console.log(datajson)       
-  };
+  };*/
+
+  const GetPallets  = async () =>{ fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+            },
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data)
+    })
+    .catch(error => {
+      console.error('Error:', error)
+    })
+    return;
+  }
 
     if (nascondi === false){
     return (
@@ -74,24 +94,41 @@ const AboutUs = props => {
             position="bottom"
             color="success"
           />
-            <IonButton onClick={checkPermission} size="large" expand="block" >
-                 Aggiungi quantità
-            </IonButton>
+            <IonItem>
+              <IonText position="floating">
+              QR: {codice}
+              </IonText>  
+              <IonButton onClick={() => {setTasto(0); checkPermission()}} size="medium" expand="block" slot="end">
+                 QR CODE SCAN
+              </IonButton>
+            </IonItem>
+            
+            <IonItem>
+            <IonLabel position="floating">
+              Nuova quantità
+            </IonLabel>
+            <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
+            </IonItem>
 
-            <IonButton onClick={checkPermission} size="large" expand="block" color="danger">
-                Sottrai quantità
-            </IonButton>
 
-            <IonButton onClick={checkPermission} size="large" expand="block" color="success">
-                 Nuovo codice
-            </IonButton>
+            <IonItem>
+              <IonText position="floating">
+              QR: {codice_nuovo}
+              </IonText>  
+              <IonButton onClick={() => {setTasto(1); checkPermission()}} size="medium" expand="block" slot="end">
+                 NEW QR CODE SCAN
+              </IonButton>
+            </IonItem>
 
-            <IonButton onClick={() => setShowModal(true)} size="large" expand="block" color="warning" >
-                 Elimina codice
-            </IonButton>
+            <IonItem>
+            <IonLabel position="floating">
+              Quantità sottratta
+            </IonLabel>
+            <IonInput onIonChange={e => setQuantità(parseInt(e.detail.value))} type="number" placeholder="Inserisci la quantità" ></IonInput>
+            </IonItem>
 
-            <IonButton onClick={getData} size="large" expand="block" color="medium" >
-                 Inventario
+            <IonButton onClick={null} size="large" expand="block" color="success" >
+                 Invio
             </IonButton>            
       </IonContent>
     </IonPage>

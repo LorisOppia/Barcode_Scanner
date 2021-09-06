@@ -36,7 +36,8 @@
     "add:android": "ionic cap add android",
     "sync": "ionic cap sync",
     "start:android": "ionic cap run android -l --external --port=3000",
-    "open:android": "ionic cap open android"
+    "open:android": "ionic cap open android",
+    "start:androidProd": "ionic cap run android --prod"
   },
   "eslintConfig": {
     "extends": [
