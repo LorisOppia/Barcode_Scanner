@@ -17,21 +17,24 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 import { url } from '../../config/config'
 
+
+
 const Pallets = props => {
 
   //Visibility Variables
-  const [nascondi, setNascondi] = React.useState(false)
-  const [showAlert, setShowAlert] = React.useState(false)
-  const [showAlert_nuovo, setShowAlert_nuovo] = React.useState(false)
-  const [showToast_invio, setShowToast_invio] = React.useState(false)
-  const [showToast_annulla, setShowToast_annulla] = React.useState(false)
-  const [showActionSheet, setShowActionSheet] = React.useState(false)
+  const [hideHomePage, setHideHomePage] = React.useState(false) //vero= mostra fotocamera falso= mostra homepage
+  const [showAlertQuantity, setShowAlertQuantity] = React.useState(false) //per inserire nuova quantità del pallets
+  const [showAlertNewQuantity, setShowAlertNewQuantity] = React.useState(false) //per inserire quantità del nuovo pallets
+  const [showToastSendButton, setShowToastSendButton] = React.useState(false) //barra sotto per invio
+  const [showToastCancelButton, setShowToastCancelButton] = React.useState(false) //barra sotto per annulla
+  const [showToastError, setShowToastError] = React.useState(false) //barra sotto per annulla
+  const [showActionSheet, setShowActionSheet] = React.useState(false) //barra dopo premuto invio
 
   //Query Variables
-  const [codice, setCodice] = React.useState()
-  const [codice_nuovo, setCodice_nuovo] = React.useState()
-  const [quantità, setQuantità] = React.useState()
-  const [quantità_nuova, setQuantità_nuova] = React.useState()
+  const [code, setCode] = React.useState()
+  const [newCode, setNewCode] = React.useState()
+  const [quantity, setQuantity] = React.useState()
+  const [newQuantity, setNewQuantity] = React.useState()
 
   const checkPermission = async (pulsante) => {
     const status = await BarcodeScanner.checkPermission({ force: true });     //chiede permesso fotocamera
@@ -39,18 +42,18 @@ const Pallets = props => {
     };
 
   const startScan = async (pulsante) => {
-    setNascondi(true)    //fa vedere la fotocamera
+    setHideHomePage(true)    //fa vedere la fotocamera
     const result = await BarcodeScanner.startScan();
-    if (result.hasContent) {if (pulsante===0) {setCodice(result.content);}
-                            if (pulsante===1) {setCodice_nuovo(result.content);}
-                            setNascondi(false);   //fa vedere la pagina
+    if (result.hasContent) {if (pulsante===0) {setCode(result.content);}
+                            if (pulsante===1) {setNewCode(result.content);}
+                            setHideHomePage(false);   //fa vedere la pagina
                             }
   };
 
   const postPallets = async ()=> {
-    var data = {"qr" : codice, "nuova_qt":quantità,"nuovo_qr":"aaaa","qt_sottratta":quantità_nuova};
+    var data = {"qr" : "qqqqqqq", "nuova_qt":quantity,"nuovo_qr":"aaaa","qt_sottratta":newQuantity};
     try {
-    fetch(url,{
+    await fetch(url,{
     method: 'POST', 
     mode: 'cors', 
     cache: 'no-cache', 
@@ -63,25 +66,27 @@ const Pallets = props => {
   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
   body: JSON.stringify(data) // body data type must match "Content-Type" header
   });
-  setCodice();
-  setQuantità();
-  setCodice_nuovo();
-  setQuantità_nuova();
+  setShowToastSendButton(true)
+  setCode();
+  setQuantity();
+  setNewCode();
+  setNewQuantity();
 }
   catch(error){
+    setShowToastError(true);
   }
 }
-    if (nascondi === false){
+    if (hideHomePage === false){
     return (
     <IonPage>
     <IonToolbar>
         <IonTitle>Home page</IonTitle>
-      </IonToolbar>
-      <IonContent>
+    </IonToolbar>
+    <IonContent>
 
       <IonAlert
-          isOpen={showAlert}
-          onDidDismiss={() => setShowAlert(false)}
+          isOpen={showAlertQuantity}
+          onDidDismiss={() => setShowAlertQuantity(false)}
           cssClass='my-custom-class'
           header={'Inserisci nuova quantità'}
           inputs={[
@@ -101,15 +106,15 @@ const Pallets = props => {
             {
               text: 'Ok',
               handler: data => {
-                setQuantità(parseInt(data.name))
+                setQuantity(parseInt(data.name))
               }
             }
           ]}
         />
 
         <IonAlert
-          isOpen={showAlert_nuovo}
-          onDidDismiss={() => setShowAlert_nuovo(false)}
+          isOpen={showAlertNewQuantity}
+          onDidDismiss={() => setShowAlertNewQuantity(false)}
           cssClass='my-custom-class'
           header={'Inserisci quantità sottratta'}
           inputs={[
@@ -129,7 +134,7 @@ const Pallets = props => {
             {
               text: 'Ok',
               handler: data => {
-                setQuantità_nuova(parseInt(data.name))
+                setNewQuantity(parseInt(data.name))
               }
             }
           ]}
@@ -138,38 +143,47 @@ const Pallets = props => {
         <IonActionSheet 
             isOpen={showActionSheet}
             onDidDismiss={() => setShowActionSheet(false)}
-            header= {"Vuoi inviare " + quantità + " oggetti e " + quantità_nuova + " oggetti?"}
+            header= {"Vuoi inviare " + quantity + " oggetti e " + newQuantity + " oggetti?"}
             buttons={[{
               text: 'Invio',
               handler: () => { 
                 postPallets();
-                setShowToast_invio(true)}
+                }
             },  {
               text: 'Annulla',
-              handler: () => { setShowToast_annulla(true)}
+              handler: () => { setShowToastCancelButton(true)}
             }]}>
         </IonActionSheet>
 
         <IonToast
-            isOpen={showToast_invio}
+            isOpen={showToastSendButton}
             duration={2000}
-            onDidDismiss={() => setShowToast_invio(false)}    //dopo 2 secondi si chiude e setta a false
+            onDidDismiss={() => setShowToastSendButton(false)}    //dopo 2 secondi si chiude e setta a false
             message="Operazione completata"
             position="bottom"
             color="success"
           />
           <IonToast
-            isOpen={showToast_annulla}
+            isOpen={showToastCancelButton}
             duration={2000}
-            onDidDismiss={() => setShowToast_annulla(false)}    //dopo 2 secondi si chiude e setta a false
+            onDidDismiss={() => setShowToastCancelButton(false)}    //dopo 2 secondi si chiude e setta a false
             message="Operazione annullata"
             position="bottom"
             color="danger"
           />
 
+          <IonToast
+            isOpen={showToastError}
+            duration={5000}
+            onDidDismiss={() => setShowToastError(false)}    //dopo 5 secondi si chiude e setta a false
+            message="Connessione con il Database non riuscita. Riprova"
+            position="bottom"
+            color="danger"
+          />          
+
             <IonItem>
               <IonLabel >
-              QR: {codice}
+              QR: {code}
               </IonLabel>  
               <IonButton onClick={() => checkPermission(0)} size="medium" expand="block" slot="end">
                  QR CODE SCAN
@@ -178,16 +192,16 @@ const Pallets = props => {
             
             <IonItem>
             <IonLabel>
-              Nuova quantità: {quantità}
+              Nuova quantità: {quantity}
             </IonLabel>
-            <IonButton onClick={() => setShowAlert(true)} size="medium" expand="block" slot="end">
+            <IonButton onClick={() => setShowAlertQuantity(true)} size="medium" expand="block" slot="end">
                  Inserisci quantità
               </IonButton>
             </IonItem>
 
             <IonItem>
               <IonLabel>
-              QR: {codice_nuovo}
+              QR: {newCode}
               </IonLabel>  
               <IonButton onClick={() => {checkPermission(1)}} size="medium" expand="block" slot="end">
                  NEW QR CODE SCAN
@@ -196,9 +210,9 @@ const Pallets = props => {
 
             <IonItem>
             <IonLabel>
-              Quantità sottratta: {quantità_nuova}
+              Quantità sottratta: {newQuantity}
             </IonLabel>
-            <IonButton onClick={() => setShowAlert_nuovo(true)} size="medium" expand="block" slot="end">
+            <IonButton onClick={() => setShowAlertNewQuantity(true)} size="medium" expand="block" slot="end">
             Inserisci quantità
               </IonButton>
             </IonItem>
@@ -209,13 +223,13 @@ const Pallets = props => {
       </IonContent>
     </IonPage>
   )}
-  if(nascondi === true) {
+  if(hideHomePage === true) {
     return(
      
       <IonHeader>
       <IonToolbar>
         <IonButton slot="end" >
-          <IonBackButton text="Indietro" defaultHref="/" onClick={() => {BarcodeScanner.stopScan(); setNascondi(false)}}/>
+          <IonBackButton text="Indietro" defaultHref="/" onClick={() => {BarcodeScanner.stopScan(); setHideHomePage(false)}}/>
        </IonButton>
       </IonToolbar>
     </IonHeader>
