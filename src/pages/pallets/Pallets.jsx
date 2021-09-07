@@ -9,19 +9,20 @@ import {
   IonItem,
   IonActionSheet,
   IonAlert,
+  IonHeader,
+  IonBackButton
 } from '@ionic/react'
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 import { url } from '../../config/config'
 
-
 const Pallets = props => {
 
   //Visibility Variables
   const [nascondi, setNascondi] = React.useState(false)
   const [showAlert, setShowAlert] = React.useState(false)
-  const [showAlert_nuovo, setShowModal_nuovo] = React.useState(false)
+  const [showAlert_nuovo, setShowAlert_nuovo] = React.useState(false)
   const [showToast_invio, setShowToast_invio] = React.useState(false)
   const [showToast_annulla, setShowToast_annulla] = React.useState(false)
   const [showActionSheet, setShowActionSheet] = React.useState(false)
@@ -47,7 +48,7 @@ const Pallets = props => {
   };
 
   const postPallets = async ()=> {
-    var data = {"qr" : "zzzz", "nuova_qt":quantità,"nuovo_qr":"aaaa","qt_sottratta":quantità_nuova};
+    var data = {"qr" : codice, "nuova_qt":quantità,"nuovo_qr":"aaaa","qt_sottratta":quantità_nuova};
     try {
     fetch(url,{
     method: 'POST', 
@@ -68,12 +69,8 @@ const Pallets = props => {
   setQuantità_nuova();
 }
   catch(error){
-
   }
 }
-
-  
-
     if (nascondi === false){
     return (
     <IonPage>
@@ -112,7 +109,7 @@ const Pallets = props => {
 
         <IonAlert
           isOpen={showAlert_nuovo}
-          onDidDismiss={() => setShowModal_nuovo(false)}
+          onDidDismiss={() => setShowAlert_nuovo(false)}
           cssClass='my-custom-class'
           header={'Inserisci quantità sottratta'}
           inputs={[
@@ -174,7 +171,7 @@ const Pallets = props => {
               <IonLabel >
               QR: {codice}
               </IonLabel>  
-              <IonButton onClick={() => {checkPermission(0)}} size="medium" expand="block" slot="end">
+              <IonButton onClick={() => checkPermission(0)} size="medium" expand="block" slot="end">
                  QR CODE SCAN
               </IonButton>
             </IonItem>
@@ -201,7 +198,7 @@ const Pallets = props => {
             <IonLabel>
               Quantità sottratta: {quantità_nuova}
             </IonLabel>
-            <IonButton onClick={() => setShowModal_nuovo(true)} size="medium" expand="block" slot="end">
+            <IonButton onClick={() => setShowAlert_nuovo(true)} size="medium" expand="block" slot="end">
             Inserisci quantità
               </IonButton>
             </IonItem>
@@ -212,9 +209,17 @@ const Pallets = props => {
       </IonContent>
     </IonPage>
   )}
-  else {
+  if(nascondi === true) {
     return(
-      null
+     
+      <IonHeader>
+      <IonToolbar>
+        <IonButton slot="end" >
+          <IonBackButton text="Indietro" defaultHref="/" onClick={() => {BarcodeScanner.stopScan(); setNascondi(false)}}/>
+       </IonButton>
+      </IonToolbar>
+    </IonHeader>
+      
     )
   }
 }
