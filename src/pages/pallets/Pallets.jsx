@@ -52,7 +52,7 @@ const Pallets = props => {
   };
 
   const postPallets = async ()=> {
-    if ((code===undefined)||(newCode===undefined)||(quantity===0)||(newQuantity===0)){
+    if ((code===undefined)||(newCode===undefined)||(quantity<=0)||(newQuantity<=0)){
       setShowToastEmptyField(true);
     }
     else {
@@ -102,6 +102,7 @@ const Pallets = props => {
               name: 'name',
               type: 'number',
               placeholder: 'Quantità',
+              min:1
             },         
           ]}
           buttons={[
@@ -200,13 +201,13 @@ const Pallets = props => {
             isOpen={showToastEmptyField}
             duration={1000}
             onDidDismiss={() => setShowToastEmptyField(false)}    //dopo 5 secondi si chiude e setta a false
-            message="E' necessario compilare tutti i campi"
+            message="E' necessario compilare tutti i campi con dei valori validi"
             position="bottom"
             color="danger"
           />      
 
             <IonItem>
-              <IonLabel >
+              <IonLabel text-wrap >
               QR: {code}
               </IonLabel>  
               <IonButton onClick={() => checkPermission(0)} size="medium" expand="block" slot="end">
@@ -215,7 +216,7 @@ const Pallets = props => {
             </IonItem>
             
             <IonItem>
-            <IonLabel>
+            <IonLabel text-wrap>
               Nuova quantità: {quantity}
             </IonLabel>
             <IonButton onClick={() => setShowAlertQuantity(true)} size="medium" expand="block" slot="end">
@@ -224,7 +225,7 @@ const Pallets = props => {
             </IonItem>
 
             <IonItem>
-              <IonLabel>
+              <IonLabel text-wrap>
               QR: {newCode}
               </IonLabel>  
               <IonButton onClick={() => {checkPermission(1)}} size="medium" expand="block" slot="end">
@@ -233,7 +234,7 @@ const Pallets = props => {
             </IonItem>
 
             <IonItem>
-            <IonLabel>
+            <IonLabel text-wrap>
               Quantità sottratta: {newQuantity}
             </IonLabel>
             <IonButton onClick={() => setShowAlertNewQuantity(true)} size="medium" expand="block" slot="end">
