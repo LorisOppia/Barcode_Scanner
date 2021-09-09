@@ -10,14 +10,13 @@ import {
   IonActionSheet,
   IonAlert,
   IonHeader,
-  IonBackButton
+  IonBackButton,
+  IonLoading
 } from '@ionic/react'
 import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 import { url } from '../../config/config'
-
-
 
 const Pallets = props => {
 
@@ -28,13 +27,15 @@ const Pallets = props => {
   const [showToastSendButton, setShowToastSendButton] = React.useState(false) //barra sotto per invio
   const [showToastCancelButton, setShowToastCancelButton] = React.useState(false) //barra sotto per annulla
   const [showToastError, setShowToastError] = React.useState(false) //barra sotto per annulla
+  const [showToastEmptyField, setShowToastEmptyField]= React.useState(false) // controlla che i campi siano pieni
   const [showActionSheet, setShowActionSheet] = React.useState(false) //barra dopo premuto invio
+  const [showLoadingDatabase,setShowLoadingDatabase] = React.useState(false) //Alert mentre si caricano le info sul DB
 
   //Query Variables
   const [code, setCode] = React.useState()
   const [newCode, setNewCode] = React.useState()
-  const [quantity, setQuantity] = React.useState()
-  const [newQuantity, setNewQuantity] = React.useState()
+  const [quantity, setQuantity] = React.useState(0)
+  const [newQuantity, setNewQuantity] = React.useState(0)
 
   const checkPermission = async (pulsante) => {
     const status = await BarcodeScanner.checkPermission({ force: true });     //chiede permesso fotocamera
@@ -51,31 +52,39 @@ const Pallets = props => {
   };
 
   const postPallets = async ()=> {
-    var data = {"qr" : "qqqqqqq", "nuova_qt":quantity,"nuovo_qr":"aaaa","qt_sottratta":newQuantity};
-    try {
-    await fetch(url,{
-    method: 'POST', 
-    mode: 'cors', 
-    cache: 'no-cache', 
-    credentials: 'same-origin', 
-    headers: {
-    'Content-Type': 'application/json'
-    // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  redirect: 'follow',
-  referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-  body: JSON.stringify(data) // body data type must match "Content-Type" header
-  });
-  setShowToastSendButton(true)
-  setCode();
-  setQuantity();
-  setNewCode();
-  setNewQuantity();
-}
-  catch(error){
-    setShowToastError(true);
+    if ((code===undefined)||(newCode===undefined)||(quantity===0)||(newQuantity===0)){
+      setShowToastEmptyField(true);
+    }
+    else {
+      setShowLoadingDatabase(true);
+      var data = {"qr" : code, "nuova_qt":quantity,"nuovo_qr":newCode,"qt_sottratta":newQuantity};
+      try {
+        await fetch(url,{
+          method: 'POST', 
+          mode: 'cors', 
+          cache: 'no-cache', 
+          credentials: 'same-origin', 
+          headers: {
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        });
+        setShowToastSendButton(true)
+        setCode();
+        setQuantity(0);
+        setNewCode();
+        setNewQuantity(0);
+      }
+      catch(error){
+        setShowToastError(true);
+      }
+    setShowLoadingDatabase(false);
   }
 }
+
     if (hideHomePage === false){
     return (
     <IonPage>
@@ -87,7 +96,6 @@ const Pallets = props => {
       <IonAlert
           isOpen={showAlertQuantity}
           onDidDismiss={() => setShowAlertQuantity(false)}
-          cssClass='my-custom-class'
           header={'Inserisci nuova quantità'}
           inputs={[
             {
@@ -140,6 +148,13 @@ const Pallets = props => {
           ]}
         />
 
+        <IonLoading
+          isOpen={showLoadingDatabase}
+          onDidDismiss={() => setShowLoadingDatabase(false)}
+          message={'Connessione al Database'}
+                 
+        />
+
         <IonActionSheet 
             isOpen={showActionSheet}
             onDidDismiss={() => setShowActionSheet(false)}
@@ -151,35 +166,44 @@ const Pallets = props => {
                 }
             },  {
               text: 'Annulla',
-              handler: () => { setShowToastCancelButton(true)}
+              handler: () => {setShowToastCancelButton(true)}
             }]}>
         </IonActionSheet>
 
-        <IonToast
+        <IonToast //Chiamato quando si conferma l'invio
             isOpen={showToastSendButton}
-            duration={2000}
+            duration={1000}
             onDidDismiss={() => setShowToastSendButton(false)}    //dopo 2 secondi si chiude e setta a false
             message="Operazione completata"
             position="bottom"
             color="success"
           />
-          <IonToast
+          <IonToast //Chiamato quando si annulla l'invio
             isOpen={showToastCancelButton}
-            duration={2000}
+            duration={1000}
             onDidDismiss={() => setShowToastCancelButton(false)}    //dopo 2 secondi si chiude e setta a false
             message="Operazione annullata"
             position="bottom"
             color="danger"
           />
 
-          <IonToast
+          <IonToast //Chiamato quando la connessione con il DB non va a buon fine
             isOpen={showToastError}
-            duration={5000}
+            duration={1000}
             onDidDismiss={() => setShowToastError(false)}    //dopo 5 secondi si chiude e setta a false
             message="Connessione con il Database non riuscita. Riprova"
             position="bottom"
             color="danger"
-          />          
+          />    
+
+          <IonToast //Chiamato quando ci sono campi non compilati
+            isOpen={showToastEmptyField}
+            duration={1000}
+            onDidDismiss={() => setShowToastEmptyField(false)}    //dopo 5 secondi si chiude e setta a false
+            message="E' necessario compilare tutti i campi"
+            position="bottom"
+            color="danger"
+          />      
 
             <IonItem>
               <IonLabel >
@@ -217,7 +241,7 @@ const Pallets = props => {
               </IonButton>
             </IonItem>
 
-            <IonButton onClick={() => setShowActionSheet(true)} size="large" expand="block" color="success" >
+            <IonButton onClick={() =>{setCode("ciao"); setNewCode("ok"); setShowActionSheet(true)}} size="large" expand="block" color="success" >
                  Invio
             </IonButton>            
       </IonContent>
