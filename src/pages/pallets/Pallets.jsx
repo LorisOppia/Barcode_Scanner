@@ -17,8 +17,14 @@ import React from 'react'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 import { url } from '../../config/config'
+import { App } from '@capacitor/app';
+
 
 const Pallets = props => {
+
+  App.addListener('backButton', () => {
+    setHideHomePage(false)
+  })
 
   //Visibility Variables
   const [hideHomePage, setHideHomePage] = React.useState(false) //vero= mostra fotocamera falso= mostra homepage
@@ -248,19 +254,7 @@ const Pallets = props => {
       </IonContent>
     </IonPage>
   )}
-  if(hideHomePage === true) {
-    return(
-     
-      <IonHeader>
-      <IonToolbar>
-        <IonButton slot="end" >
-          <IonBackButton text="Indietro" defaultHref="/" onClick={() => {BarcodeScanner.stopScan(); setHideHomePage(false)}}/>
-       </IonButton>
-      </IonToolbar>
-    </IonHeader>
-      
-    )
-  }
+  else {return null;}
 }
 
 export default Pallets
