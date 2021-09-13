@@ -9,8 +9,6 @@ import {
   IonItem,
   IonActionSheet,
   IonAlert,
-  IonHeader,
-  IonBackButton,
   IonLoading
 } from '@ionic/react'
 import React from 'react'
@@ -23,6 +21,7 @@ import { App } from '@capacitor/app';
 const Pallets = props => {
 
   App.addListener('backButton', () => {
+    BarcodeScanner.stopScan();
     setHideHomePage(false)
   })
 
@@ -246,12 +245,12 @@ const Pallets = props => {
             <IonButton onClick={() => setShowAlertNewQuantity(true)} size="medium" expand="block" slot="end">
             Inserisci quantità
               </IonButton>
-            </IonItem>
-
-            <IonButton onClick={() =>{setCode("ciao"); setNewCode("ok"); setShowActionSheet(true)}} size="large" expand="block" color="success" >
-                 Invio
-            </IonButton>            
+            </IonItem>          
       </IonContent>
+
+      <IonButton onClick={() =>{setCode("ciao"); setNewCode("ok"); setShowActionSheet(true)}} size="large" expand="block" color="success" >
+                 Invio
+            </IonButton>  
     </IonPage>
   )}
   else {return null;}
